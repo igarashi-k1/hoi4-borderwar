@@ -1,0 +1,286 @@
+add_namespace = borderwar
+
+# 変数（要求した国に保存）
+#   bw_target_state   : 要求したステート
+#   bw_target_country : 要求した相手国
+#   bw_attack_state   : 国境紛争で攻撃側となる自国ステート
+
+# ---------------------------------------------------------------
+# 割譲要求を受けた国への通知
+# ROOT = 要求を受けた国、FROM = 要求した国
+# ※ 返答期限切れ時は最初の選択肢（拒否）が選ばれる
+# ---------------------------------------------------------------
+country_event = {
+	id = borderwar.1
+	title = borderwar.1.t
+	desc = borderwar.1.d
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			FROM = { var:bw_target_state = { save_event_target_as = bw_state } }
+		}
+	}
+
+	# 拒否
+	option = {
+		name = borderwar.1.b
+		ai_chance = {
+			factor = 70
+			modifier = {
+				factor = 0.25
+				strength_ratio = { tag = FROM ratio < 0.5 }
+			}
+		}
+		FROM = { country_event = { id = borderwar.3 days = 1 } }
+	}
+
+	# 受諾（ステートを割譲）
+	option = {
+		name = borderwar.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				factor = 3
+				strength_ratio = { tag = FROM ratio < 0.5 }
+			}
+		}
+		FROM = {
+			var:bw_target_state = {
+				if = {
+					limit = { is_owned_by = ROOT }
+					transfer_state_to = PREV
+				}
+			}
+			country_event = { id = borderwar.2 days = 1 }
+		}
+	}
+}
+
+# ---------------------------------------------------------------
+# 要求が受諾された（要求した国への通知）
+# ROOT = 要求した国、FROM = 要求を受けた国
+# ---------------------------------------------------------------
+country_event = {
+	id = borderwar.2
+	title = borderwar.2.t
+	desc = borderwar.2.d
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			var:bw_target_state = { save_event_target_as = bw_state }
+		}
+	}
+
+	option = {
+		name = borderwar.2.a
+		clr_country_flag = bw_demand_pending
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
+	}
+}
+
+# ---------------------------------------------------------------
+# 要求が拒否された（要求した国が対応を選ぶ）
+# ROOT = 要求した国、FROM = 要求を受けた国
+# ---------------------------------------------------------------
+country_event = {
+	id = borderwar.3
+	title = borderwar.3.t
+	desc = borderwar.3.d
+	picture = GFX_report_event_military_planning
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			var:bw_target_state = { save_event_target_as = bw_state }
+		}
+	}
+
+	# 何もしない
+	option = {
+		name = borderwar.3.a
+		ai_chance = { factor = 1 }
+		clr_country_flag = bw_demand_pending
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
+	}
+
+	# 国境紛争を開始
+	option = {
+		name = borderwar.3.b
+		trigger = {
+			NOT = { has_border_war = yes }
+			NOT = { has_war_with = FROM }
+			FROM = { NOT = { has_border_war = yes } }
+			var:bw_target_state = {
+				is_owned_by = FROM
+				any_neighbor_state = { is_owned_by = ROOT }
+			}
+		}
+		ai_chance = { factor = 0 }
+		clr_country_flag = bw_demand_pending
+		# 対象ステートに隣接する自国ステートを攻撃側に選ぶ
+		var:bw_target_state = {
+			random_neighbor_state = {
+				limit = { is_owned_by = ROOT }
+				set_variable = { ROOT.bw_attack_state = THIS }
+			}
+		}
+		start_border_war = {
+			change_state_after_war = no
+			attacker = {
+				state = var:bw_attack_state
+				num_provinces = 4
+				on_win = borderwar.10
+				on_lose = borderwar.11
+				on_cancel = borderwar.12
+			}
+			defender = {
+				state = var:bw_target_state
+				num_provinces = 4
+				on_win = borderwar.13
+				on_lose = borderwar.14
+				on_cancel = borderwar.15
+			}
+		}
+	}
+
+	# 宣戦布告
+	option = {
+		name = borderwar.3.c
+		trigger = {
+			is_subject = no
+			NOT = { has_war_with = FROM }
+		}
+		ai_chance = { factor = 0 }
+		clr_country_flag = bw_demand_pending
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
+		declare_war_on = {
+			target = FROM
+			type = annex_everything
+		}
+	}
+}
+
+# ---------------------------------------------------------------
+# 国境紛争の結果（攻撃側）  ROOT = 攻撃側の国
+# ---------------------------------------------------------------
+
+# 勝利：相手国の、自国に隣接する中核州ではないステートをランダムに1つ獲得
+country_event = {
+	id = borderwar.10
+	title = borderwar.10.t
+	desc = {
+		text = borderwar.10.d
+		trigger = { has_country_flag = bw_gained_state }
+	}
+	desc = {
+		text = borderwar.10.d_none
+		trigger = { NOT = { has_country_flag = bw_gained_state } }
+	}
+	picture = GFX_report_event_soldiers_marching
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = { has_variable = bw_target_country }
+			var:bw_target_country = {
+				save_event_target_as = bw_enemy
+				random_owned_state = {
+					limit = {
+						any_neighbor_state = { is_owned_by = ROOT }
+						NOT = { is_core_of = PREV }
+					}
+					save_event_target_as = bw_won_state
+					ROOT = { set_country_flag = bw_gained_state }
+					transfer_state_to = ROOT
+				}
+			}
+		}
+	}
+
+	option = {
+		name = borderwar.10.a
+		clr_country_flag = bw_gained_state
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
+		clear_variable = bw_attack_state
+	}
+}
+
+# 敗北：ペナルティなし
+country_event = {
+	id = borderwar.11
+	title = borderwar.11.t
+	desc = borderwar.11.d
+	picture = GFX_report_event_military_planning
+	is_triggered_only = yes
+
+	option = {
+		name = borderwar.11.a
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
+		clear_variable = bw_attack_state
+	}
+}
+
+# 引き分け：ペナルティなし
+country_event = {
+	id = borderwar.12
+	title = borderwar.12.t
+	desc = borderwar.12.d
+	picture = GFX_report_event_military_planning
+	is_triggered_only = yes
+
+	option = {
+		name = borderwar.12.a
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
+		clear_variable = bw_attack_state
+	}
+}
+
+# ---------------------------------------------------------------
+# 国境紛争の結果（防衛側への通知）  ROOT = 防衛側の国
+# ステートの移動は攻撃側の borderwar.10 で処理する
+# ---------------------------------------------------------------
+country_event = {
+	id = borderwar.13
+	title = borderwar.13.t
+	desc = borderwar.13.d
+	picture = GFX_report_event_soldiers_marching
+	is_triggered_only = yes
+
+	option = {
+		name = borderwar.13.a
+	}
+}
+
+country_event = {
+	id = borderwar.14
+	title = borderwar.14.t
+	desc = borderwar.14.d
+	picture = GFX_report_event_military_planning
+	is_triggered_only = yes
+
+	option = {
+		name = borderwar.14.a
+	}
+}
+
+country_event = {
+	id = borderwar.15
+	title = borderwar.15.t
+	desc = borderwar.15.d
+	picture = GFX_report_event_military_planning
+	is_triggered_only = yes
+
+	option = {
+		name = borderwar.15.a
+	}
+}

@@ -1,0 +1,57 @@
+borderwar_category = {
+
+	# 隣接する国の、隣接する（その国の中核州ではない）ステートの割譲を要求する
+	# ROOT = 要求する国、FROM = 対象ステート
+	# 相手国の返答はイベント borderwar.1 で行い、拒否された場合は borderwar.3 で対応を選ぶ
+	bw_demand_state = {
+		icon = generic_army_support
+		cost = 0
+		fire_only_once = no
+
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		target_root_trigger = {
+			NOT = { has_country_flag = bw_demand_pending }
+			NOT = { has_border_war = yes }
+		}
+
+		target_trigger = {
+			FROM = {
+				# 他国が所有し、自国の所有ステートに隣接している
+				NOT = { is_owned_by = ROOT }
+				any_neighbor_state = { is_owned_by = ROOT }
+				owner = {
+					NOT = { has_war_with = ROOT }
+					NOT = { has_border_war = yes }
+					# 所有国の中核州ではない（PREV = 対象ステート、その中の PREV = 所有国）
+					PREV = { NOT = { is_core_of = PREV } }
+				}
+			}
+		}
+
+		visible = {
+			NOT = { has_country_flag = bw_demand_pending }
+		}
+
+		available = {
+			NOT = { has_border_war = yes }
+		}
+
+		complete_effect = {
+			# 返答が来ない場合でもロックが残らないよう期限付きフラグにする
+			set_country_flag = { flag = bw_demand_pending days = 60 value = 1 }
+			set_variable = { bw_target_state = FROM }
+			FROM = {
+				owner = {
+					set_variable = { ROOT.bw_target_country = THIS }
+					country_event = { id = borderwar.1 days = 1 }
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 0
+		}
+	}
+}
