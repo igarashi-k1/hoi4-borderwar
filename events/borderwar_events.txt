@@ -77,6 +77,53 @@ country_event = {
 }
 
 # ---------------------------------------------------------------
+# 中核州の割譲要求を受けた国への通知（ほぼ受諾しない）
+# ROOT = 要求を受けた国、FROM = 要求した国
+# 受諾・拒否後は通常の要求と同じ borderwar.2 / borderwar.3 へ
+# ---------------------------------------------------------------
+country_event = {
+	id = borderwar.4
+	title = borderwar.4.t
+	desc = borderwar.4.d
+	picture = GFX_report_event_military_planning
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			FROM = { var:bw_target_state = { save_event_target_as = bw_state } }
+		}
+	}
+
+	# 拒否
+	option = {
+		name = borderwar.4.b
+		ai_chance = { factor = 99 }
+		FROM = { country_event = { id = borderwar.3 days = 1 } }
+	}
+
+	# 受諾（中核州を割譲）
+	option = {
+		name = borderwar.4.a
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 3
+				strength_ratio = { tag = FROM ratio < 0.5 }
+			}
+		}
+		FROM = {
+			var:bw_target_state = {
+				if = {
+					limit = { is_owned_by = ROOT }
+					transfer_state_to = PREV
+				}
+			}
+			country_event = { id = borderwar.2 days = 1 }
+		}
+	}
+}
+
+# ---------------------------------------------------------------
 # 要求が受諾された（要求した国への通知）
 # ROOT = 要求した国、FROM = 要求を受けた国
 # ---------------------------------------------------------------
@@ -98,6 +145,7 @@ country_event = {
 		clr_country_flag = bw_demand_pending
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
+		clr_country_flag = bw_core_demand
 	}
 }
 
@@ -125,6 +173,7 @@ country_event = {
 		clr_country_flag = bw_demand_pending
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
+		clr_country_flag = bw_core_demand
 	}
 
 	# 国境紛争を開始
@@ -178,6 +227,7 @@ country_event = {
 		clr_country_flag = bw_demand_pending
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
+		clr_country_flag = bw_core_demand
 		declare_war_on = {
 			target = FROM
 			type = annex_everything
@@ -189,7 +239,8 @@ country_event = {
 # 国境紛争の結果（攻撃側）  ROOT = 攻撃側の国
 # ---------------------------------------------------------------
 
-# 勝利：相手国の、自国に隣接する中核州ではないステートをランダムに1つ獲得
+# 勝利：相手国の、自国に隣接するステートをランダムに1つ獲得
+# （通常の要求なら中核州ではないもの、中核州要求なら首都以外の中核州）
 country_event = {
 	id = borderwar.10
 	title = borderwar.10.t
@@ -209,14 +260,31 @@ country_event = {
 			limit = { has_variable = bw_target_country }
 			var:bw_target_country = {
 				save_event_target_as = bw_enemy
-				random_owned_state = {
-					limit = {
-						any_neighbor_state = { is_owned_by = ROOT }
-						NOT = { is_core_of = PREV }
+				if = {
+					# 中核州要求からの国境紛争：隣接する中核州（首都を除く）
+					limit = { ROOT = { has_country_flag = bw_core_demand } }
+					random_owned_state = {
+						limit = {
+							any_neighbor_state = { is_owned_by = ROOT }
+							is_core_of = PREV
+							NOT = { is_capital = yes }
+						}
+						save_event_target_as = bw_won_state
+						ROOT = { set_country_flag = bw_gained_state }
+						transfer_state_to = ROOT
 					}
-					save_event_target_as = bw_won_state
-					ROOT = { set_country_flag = bw_gained_state }
-					transfer_state_to = ROOT
+				}
+				else = {
+					# 通常の要求からの国境紛争：隣接する中核州ではないステート
+					random_owned_state = {
+						limit = {
+							any_neighbor_state = { is_owned_by = ROOT }
+							NOT = { is_core_of = PREV }
+						}
+						save_event_target_as = bw_won_state
+						ROOT = { set_country_flag = bw_gained_state }
+						transfer_state_to = ROOT
+					}
 				}
 			}
 		}
@@ -227,6 +295,7 @@ country_event = {
 		clr_country_flag = bw_gained_state
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
+		clr_country_flag = bw_core_demand
 		clear_variable = bw_attack_state
 	}
 }
@@ -243,6 +312,7 @@ country_event = {
 		name = borderwar.11.a
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
+		clr_country_flag = bw_core_demand
 		clear_variable = bw_attack_state
 	}
 }
@@ -259,6 +329,7 @@ country_event = {
 		name = borderwar.12.a
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
+		clr_country_flag = bw_core_demand
 		clear_variable = bw_attack_state
 	}
 }

@@ -41,11 +41,69 @@ borderwar_category = {
 		complete_effect = {
 			# 返答が来ない場合でもロックが残らないよう期限付きフラグにする
 			set_country_flag = { flag = bw_demand_pending days = 60 value = 1 }
+			clr_country_flag = bw_core_demand
 			set_variable = { bw_target_state = FROM }
 			FROM = {
 				owner = {
 					set_variable = { ROOT.bw_target_country = THIS }
 					country_event = { id = borderwar.1 days = 1 }
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 0
+		}
+	}
+
+	# 隣接する国の、隣接する「その国の中核州」の割譲を要求する（相手はほぼ受諾しない）
+	# ROOT = 要求する国、FROM = 対象ステート
+	# 返答はイベント borderwar.4、拒否後の対応は通常の要求と同じ borderwar.3
+	# 国境紛争に勝利した場合は、相手国の隣接する中核州（首都を除く）をランダムに獲得する
+	bw_demand_core_state = {
+		icon = generic_army_support
+		cost = 0
+		fire_only_once = no
+
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		target_root_trigger = {
+			NOT = { has_country_flag = bw_demand_pending }
+			NOT = { has_border_war = yes }
+		}
+
+		target_trigger = {
+			FROM = {
+				NOT = { is_owned_by = ROOT }
+				NOT = { is_capital = yes }
+				any_neighbor_state = { is_owned_by = ROOT }
+				owner = {
+					NOT = { has_war_with = ROOT }
+					NOT = { has_border_war = yes }
+					# 所有国の中核州である（PREV = 対象ステート、その中の PREV = 所有国）
+					PREV = { is_core_of = PREV }
+				}
+			}
+		}
+
+		visible = {
+			NOT = { has_country_flag = bw_demand_pending }
+		}
+
+		available = {
+			NOT = { has_border_war = yes }
+		}
+
+		complete_effect = {
+			set_country_flag = { flag = bw_demand_pending days = 60 value = 1 }
+			# 中核州要求であることを結果イベントに伝えるフラグ
+			set_country_flag = bw_core_demand
+			set_variable = { bw_target_state = FROM }
+			FROM = {
+				owner = {
+					set_variable = { ROOT.bw_target_country = THIS }
+					country_event = { id = borderwar.4 days = 1 }
 				}
 			}
 		}
