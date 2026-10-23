@@ -112,4 +112,42 @@ borderwar_category = {
 			factor = 0
 		}
 	}
+
+	# 首都しか残っていない隣国に併合を要求する
+	# ROOT = 要求する国、FROM = 対象国
+	# 返答はイベント borderwar.5（AI は必ず併合を受諾）、拒否されたら borderwar.7 で宣戦布告するか選ぶ
+	bw_demand_annex = {
+		icon = generic_army_support
+		cost = 0
+		fire_only_once = no
+
+		target_root_trigger = {
+			NOT = { has_country_flag = bw_demand_pending }
+		}
+
+		target_trigger = {
+			FROM = {
+				exists = yes
+				NOT = { tag = ROOT }
+				NOT = { has_war_with = ROOT }
+				# 所有ステートが首都のみ
+				NOT = { any_owned_state = { NOT = { is_capital = yes } } }
+				# 自国と陸で隣接している
+				any_owned_state = { any_neighbor_state = { is_owned_by = ROOT } }
+			}
+		}
+
+		visible = {
+			NOT = { has_country_flag = bw_demand_pending }
+		}
+
+		complete_effect = {
+			set_country_flag = { flag = bw_demand_pending days = 60 value = 1 }
+			FROM = { country_event = { id = borderwar.5 days = 1 } }
+		}
+
+		ai_will_do = {
+			factor = 0
+		}
+	}
 }

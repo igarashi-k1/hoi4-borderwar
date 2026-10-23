@@ -236,6 +236,87 @@ country_event = {
 }
 
 # ---------------------------------------------------------------
+# 併合要求を受けた国への通知（首都しか残っていない国）
+# ROOT = 要求を受けた国、FROM = 要求した国
+# AI は必ず併合を受諾する。返答期限切れ時も最初の選択肢（受諾）が選ばれる
+# ---------------------------------------------------------------
+country_event = {
+	id = borderwar.5
+	title = borderwar.5.t
+	desc = borderwar.5.d
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	# 受諾（併合される）
+	option = {
+		name = borderwar.5.a
+		ai_chance = { factor = 100 }
+		FROM = { country_event = { id = borderwar.6 } }
+		FROM = {
+			annex_country = {
+				target = ROOT
+				transfer_troops = yes
+			}
+		}
+	}
+
+	# 拒否
+	option = {
+		name = borderwar.5.b
+		ai_chance = { factor = 0 }
+		FROM = { country_event = { id = borderwar.7 days = 1 } }
+	}
+}
+
+# 併合要求が受諾された（要求した国への通知）
+# ROOT = 要求した国、FROM = 併合された国
+country_event = {
+	id = borderwar.6
+	title = borderwar.6.t
+	desc = borderwar.6.d
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	option = {
+		name = borderwar.6.a
+		clr_country_flag = bw_demand_pending
+	}
+}
+
+# 併合要求が拒否された（要求した国が対応を選ぶ）
+# ROOT = 要求した国、FROM = 要求を受けた国
+country_event = {
+	id = borderwar.7
+	title = borderwar.7.t
+	desc = borderwar.7.d
+	picture = GFX_report_event_military_planning
+	is_triggered_only = yes
+
+	# 何もしない
+	option = {
+		name = borderwar.7.a
+		ai_chance = { factor = 1 }
+		clr_country_flag = bw_demand_pending
+	}
+
+	# 宣戦布告
+	option = {
+		name = borderwar.7.b
+		trigger = {
+			is_subject = no
+			NOT = { has_war_with = FROM }
+			FROM = { exists = yes }
+		}
+		ai_chance = { factor = 0 }
+		clr_country_flag = bw_demand_pending
+		declare_war_on = {
+			target = FROM
+			type = annex_everything
+		}
+	}
+}
+
+# ---------------------------------------------------------------
 # 国境紛争の結果（攻撃側）  ROOT = 攻撃側の国
 # ---------------------------------------------------------------
 
