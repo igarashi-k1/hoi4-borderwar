@@ -32,6 +32,15 @@ country_event = {
 				factor = 0.25
 				strength_ratio = { tag = FROM ratio < 0.5 }
 			}
+			# 同じイデオロギーなら拒否しにくく、別イデオロギーなら拒否しやすい
+			modifier = {
+				factor = 0.5
+				bw_same_ideology_as_from = yes
+			}
+			modifier = {
+				factor = 2
+				NOT = { bw_same_ideology_as_from = yes }
+			}
 		}
 		FROM = { country_event = { id = borderwar.3 days = 1 } }
 	}
@@ -44,6 +53,15 @@ country_event = {
 			modifier = {
 				factor = 3
 				strength_ratio = { tag = FROM ratio < 0.5 }
+			}
+			# 同じイデオロギーなら受諾しやすく、別イデオロギーなら受諾しにくい
+			modifier = {
+				factor = 2
+				bw_same_ideology_as_from = yes
+			}
+			modifier = {
+				factor = 0.5
+				NOT = { bw_same_ideology_as_from = yes }
 			}
 		}
 		FROM = {

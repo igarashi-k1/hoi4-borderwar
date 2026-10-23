@@ -7,7 +7,7 @@
 1. 「国境紛争」カテゴリの **[ステート名]の割譲を要求** を実行（マップ上のステートから選択）
    - 対象：自国の所有ステートに隣接する他国のステートのうち、**所有国の中核州ではない**もの
    - 自国・相手国とも国境紛争中でなく、相手国と戦争中でないこと
-2. 相手国にイベントが届き、受諾か拒否を選ぶ（AI は国力差を見て判断。自国の戦力が相手の半分未満だと受諾しやすい）
+2. 相手国にイベントが届き、受諾か拒否を選ぶ（AI は国力差とイデオロギーを見て判断。自国の戦力が相手の半分未満だと受諾しやすく、要求した国と同じイデオロギーなら受諾しやすく、別イデオロギーなら受諾しにくい）
    - **受諾**：そのステートが自国に割譲される
    - **拒否**：要求した国にイベントが届き、次から選ぶ
      | 選択肢 | 効果 |
@@ -49,6 +49,7 @@ path="mod/hoi4-borderwar"
 descriptor.mod
 common/decisions/categories/borderwar_categories.txt
 common/decisions/borderwar_decisions.txt
+common/scripted_triggers/borderwar_scripted_triggers.txt
 events/borderwar_events.txt
 localisation/english/borderwar_l_english.yml     (UTF-8 BOM付き)
 localisation/japanese/borderwar_l_japanese.yml   (UTF-8 BOM付き)

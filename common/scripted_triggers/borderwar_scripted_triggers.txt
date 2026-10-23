@@ -1,0 +1,21 @@
+# ROOT と FROM が同じイデオロギー（民主主義・ファシズム・共産主義・中道）か
+bw_same_ideology_as_from = {
+	OR = {
+		AND = {
+			has_government = democratic
+			FROM = { has_government = democratic }
+		}
+		AND = {
+			has_government = fascism
+			FROM = { has_government = fascism }
+		}
+		AND = {
+			has_government = communism
+			FROM = { has_government = communism }
+		}
+		AND = {
+			has_government = neutrality
+			FROM = { has_government = neutrality }
+		}
+	}
+}
