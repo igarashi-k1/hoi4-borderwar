@@ -59,7 +59,7 @@ borderwar_category = {
 	# 隣接する国の、隣接する「その国の中核州」の割譲を要求する（相手はほぼ受諾しない）
 	# ROOT = 要求する国、FROM = 対象ステート
 	# 返答はイベント borderwar.4、拒否後の対応は通常の要求と同じ borderwar.3
-	# 国境紛争に勝利した場合は、相手国の隣接する中核州（首都を除く）をランダムに獲得する
+	# 国境紛争に勝利した場合は、このディシジョンで選んだステートを獲得する
 	bw_demand_core_state = {
 		icon = generic_army_support
 		cost = 0

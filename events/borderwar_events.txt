@@ -320,8 +320,8 @@ country_event = {
 # 国境紛争の結果（攻撃側）  ROOT = 攻撃側の国
 # ---------------------------------------------------------------
 
-# 勝利：相手国の、自国に隣接するステートをランダムに1つ獲得
-# （通常の要求なら中核州ではないもの、中核州要求なら首都以外の中核州）
+# 勝利：ステートを1つ獲得
+# （通常の要求なら隣接する中核州ではないステートをランダムに、中核州要求ならディシジョンで選んだステート）
 country_event = {
 	id = borderwar.10
 	title = borderwar.10.t
@@ -342,17 +342,17 @@ country_event = {
 			var:bw_target_country = {
 				save_event_target_as = bw_enemy
 				if = {
-					# 中核州要求からの国境紛争：隣接する中核州（首都を除く）
+					# 中核州要求からの国境紛争：ディシジョンで選んだステートを獲得
 					limit = { ROOT = { has_country_flag = bw_core_demand } }
-					random_owned_state = {
-						limit = {
-							any_neighbor_state = { is_owned_by = ROOT }
-							is_core_of = PREV
-							NOT = { is_capital = yes }
+					ROOT = {
+						var:bw_target_state = {
+							if = {
+								limit = { is_owned_by = event_target:bw_enemy }
+								save_event_target_as = bw_won_state
+								ROOT = { set_country_flag = bw_gained_state }
+								transfer_state_to = ROOT
+							}
 						}
-						save_event_target_as = bw_won_state
-						ROOT = { set_country_flag = bw_gained_state }
-						transfer_state_to = ROOT
 					}
 				}
 				else = {
