@@ -41,7 +41,6 @@ borderwar_category = {
 		complete_effect = {
 			# 返答が来ない場合でもロックが残らないよう期限付きフラグにする
 			set_country_flag = { flag = bw_demand_pending days = 60 value = 1 }
-			clr_country_flag = bw_core_demand
 			set_variable = { bw_target_state = FROM }
 			FROM = {
 				owner = {
@@ -97,8 +96,6 @@ borderwar_category = {
 
 		complete_effect = {
 			set_country_flag = { flag = bw_demand_pending days = 60 value = 1 }
-			# 中核州要求であることを結果イベントに伝えるフラグ
-			set_country_flag = bw_core_demand
 			set_variable = { bw_target_state = FROM }
 			FROM = {
 				owner = {

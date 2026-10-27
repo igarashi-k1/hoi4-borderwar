@@ -145,7 +145,6 @@ country_event = {
 		clr_country_flag = bw_demand_pending
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
-		clr_country_flag = bw_core_demand
 	}
 }
 
@@ -173,7 +172,6 @@ country_event = {
 		clr_country_flag = bw_demand_pending
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
-		clr_country_flag = bw_core_demand
 	}
 
 	# 国境紛争を開始
@@ -227,7 +225,6 @@ country_event = {
 		clr_country_flag = bw_demand_pending
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
-		clr_country_flag = bw_core_demand
 		declare_war_on = {
 			target = FROM
 			type = annex_everything
@@ -320,8 +317,7 @@ country_event = {
 # 国境紛争の結果（攻撃側）  ROOT = 攻撃側の国
 # ---------------------------------------------------------------
 
-# 勝利：ステートを1つ獲得
-# （通常の要求なら隣接する中核州ではないステートをランダムに、中核州要求ならディシジョンで選んだステート）
+# 勝利：ディシジョンで選んだステートを獲得
 country_event = {
 	id = borderwar.10
 	title = borderwar.10.t
@@ -337,35 +333,16 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		# ディシジョンで選んだステートを、相手国がまだ所有していれば獲得する
 		if = {
 			limit = { has_variable = bw_target_country }
-			var:bw_target_country = {
-				save_event_target_as = bw_enemy
+			var:bw_target_country = { save_event_target_as = bw_enemy }
+			var:bw_target_state = {
 				if = {
-					# 中核州要求からの国境紛争：ディシジョンで選んだステートを獲得
-					limit = { ROOT = { has_country_flag = bw_core_demand } }
-					ROOT = {
-						var:bw_target_state = {
-							if = {
-								limit = { is_owned_by = event_target:bw_enemy }
-								save_event_target_as = bw_won_state
-								ROOT = { set_country_flag = bw_gained_state }
-								transfer_state_to = ROOT
-							}
-						}
-					}
-				}
-				else = {
-					# 通常の要求からの国境紛争：隣接する中核州ではないステート
-					random_owned_state = {
-						limit = {
-							any_neighbor_state = { is_owned_by = ROOT }
-							NOT = { is_core_of = PREV }
-						}
-						save_event_target_as = bw_won_state
-						ROOT = { set_country_flag = bw_gained_state }
-						transfer_state_to = ROOT
-					}
+					limit = { is_owned_by = event_target:bw_enemy }
+					save_event_target_as = bw_won_state
+					ROOT = { set_country_flag = bw_gained_state }
+					transfer_state_to = ROOT
 				}
 			}
 		}
@@ -376,7 +353,6 @@ country_event = {
 		clr_country_flag = bw_gained_state
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
-		clr_country_flag = bw_core_demand
 		clear_variable = bw_attack_state
 	}
 }
@@ -393,7 +369,6 @@ country_event = {
 		name = borderwar.11.a
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
-		clr_country_flag = bw_core_demand
 		clear_variable = bw_attack_state
 	}
 }
@@ -410,7 +385,6 @@ country_event = {
 		name = borderwar.12.a
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country
-		clr_country_flag = bw_core_demand
 		clear_variable = bw_attack_state
 	}
 }
