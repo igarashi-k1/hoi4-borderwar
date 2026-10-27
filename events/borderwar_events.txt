@@ -9,6 +9,7 @@ add_namespace = borderwar
 # 割譲要求を受けた国への通知
 # ROOT = 要求を受けた国、FROM = 要求した国
 # ※ 返答期限切れ時は最初の選択肢（拒否）が選ばれる
+# ※ 要求した国が同盟国（同じ陣営）か宗主国なら受諾のみ、属国なら一蹴のみ
 # ---------------------------------------------------------------
 country_event = {
 	id = borderwar.1
@@ -23,9 +24,21 @@ country_event = {
 		}
 	}
 
-	# 拒否
+	# 宗主国として一蹴（要求した国が自国の属国の場合のみ）
+	option = {
+		name = borderwar.1.c
+		trigger = { bw_from_is_subject = yes }
+		ai_chance = { factor = 100 }
+		FROM = { country_event = { id = borderwar.8 days = 1 } }
+	}
+
+	# 拒否（同盟国・宗主国・属国からの要求では選べない）
 	option = {
 		name = borderwar.1.b
+		trigger = {
+			NOT = { bw_from_is_subject = yes }
+			NOT = { bw_must_cede_to_from = yes }
+		}
 		ai_chance = {
 			factor = 70
 			modifier = {
@@ -45,9 +58,10 @@ country_event = {
 		FROM = { country_event = { id = borderwar.3 days = 1 } }
 	}
 
-	# 受諾（ステートを割譲）
+	# 受諾（ステートを割譲）。同盟国・宗主国からの要求ではこれしか選べない
 	option = {
 		name = borderwar.1.a
+		trigger = { NOT = { bw_from_is_subject = yes } }
 		ai_chance = {
 			factor = 30
 			modifier = {
@@ -80,6 +94,7 @@ country_event = {
 # 中核州の割譲要求を受けた国への通知（ほぼ受諾しない）
 # ROOT = 要求を受けた国、FROM = 要求した国
 # 受諾・拒否後は通常の要求と同じ borderwar.2 / borderwar.3 へ
+# ※ 要求した国が同盟国（同じ陣営）か宗主国なら受諾のみ、属国なら一蹴のみ
 # ---------------------------------------------------------------
 country_event = {
 	id = borderwar.4
@@ -94,16 +109,29 @@ country_event = {
 		}
 	}
 
-	# 拒否
+	# 宗主国として一蹴（要求した国が自国の属国の場合のみ）
+	option = {
+		name = borderwar.4.c
+		trigger = { bw_from_is_subject = yes }
+		ai_chance = { factor = 100 }
+		FROM = { country_event = { id = borderwar.8 days = 1 } }
+	}
+
+	# 拒否（同盟国・宗主国・属国からの要求では選べない）
 	option = {
 		name = borderwar.4.b
+		trigger = {
+			NOT = { bw_from_is_subject = yes }
+			NOT = { bw_must_cede_to_from = yes }
+		}
 		ai_chance = { factor = 99 }
 		FROM = { country_event = { id = borderwar.3 days = 1 } }
 	}
 
-	# 受諾（中核州を割譲）
+	# 受諾（中核州を割譲）。同盟国・宗主国からの要求ではこれしか選べない
 	option = {
 		name = borderwar.4.a
+		trigger = { NOT = { bw_from_is_subject = yes } }
 		ai_chance = {
 			factor = 1
 			modifier = {
@@ -229,6 +257,25 @@ country_event = {
 			target = FROM
 			type = annex_everything
 		}
+	}
+}
+
+# ---------------------------------------------------------------
+# 宗主国に要求を一蹴された（要求した国への通知）
+# ROOT = 要求した国（属国）、FROM = 宗主国
+# ---------------------------------------------------------------
+country_event = {
+	id = borderwar.8
+	title = borderwar.8.t
+	desc = borderwar.8.d
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	option = {
+		name = borderwar.8.a
+		clr_country_flag = bw_demand_pending
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
 	}
 }
 
