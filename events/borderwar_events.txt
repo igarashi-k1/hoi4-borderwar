@@ -14,7 +14,15 @@ add_namespace = borderwar
 country_event = {
 	id = borderwar.1
 	title = borderwar.1.t
-	desc = borderwar.1.d
+	desc = {
+		text = borderwar.1.d
+		trigger = { NOT = { bw_must_cede_to_from = yes } }
+	}
+	# 同盟国・宗主国からの要求
+	desc = {
+		text = borderwar.1.d_ally
+		trigger = { bw_must_cede_to_from = yes }
+	}
 	picture = GFX_report_event_generic_sign_treaty1
 	is_triggered_only = yes
 
@@ -58,10 +66,13 @@ country_event = {
 		FROM = { country_event = { id = borderwar.3 days = 1 } }
 	}
 
-	# 受諾（ステートを割譲）。同盟国・宗主国からの要求ではこれしか選べない
+	# 受諾（ステートを割譲）
 	option = {
 		name = borderwar.1.a
-		trigger = { NOT = { bw_from_is_subject = yes } }
+		trigger = {
+			NOT = { bw_from_is_subject = yes }
+			NOT = { bw_must_cede_to_from = yes }
+		}
 		ai_chance = {
 			factor = 30
 			modifier = {
@@ -88,6 +99,22 @@ country_event = {
 			country_event = { id = borderwar.2 days = 1 }
 		}
 	}
+
+	# 受諾（同盟国・宗主国からの要求。これしか選べない）
+	option = {
+		name = borderwar.1.a_ally
+		trigger = { bw_must_cede_to_from = yes }
+		ai_chance = { factor = 100 }
+		FROM = {
+			var:bw_target_state = {
+				if = {
+					limit = { is_owned_by = ROOT }
+					transfer_state_to = PREV
+				}
+			}
+			country_event = { id = borderwar.2 days = 1 }
+		}
+	}
 }
 
 # ---------------------------------------------------------------
@@ -99,7 +126,15 @@ country_event = {
 country_event = {
 	id = borderwar.4
 	title = borderwar.4.t
-	desc = borderwar.4.d
+	desc = {
+		text = borderwar.4.d
+		trigger = { NOT = { bw_must_cede_to_from = yes } }
+	}
+	# 同盟国・宗主国からの要求
+	desc = {
+		text = borderwar.4.d_ally
+		trigger = { bw_must_cede_to_from = yes }
+	}
 	picture = GFX_report_event_military_planning
 	is_triggered_only = yes
 
@@ -128,10 +163,13 @@ country_event = {
 		FROM = { country_event = { id = borderwar.3 days = 1 } }
 	}
 
-	# 受諾（中核州を割譲）。同盟国・宗主国からの要求ではこれしか選べない
+	# 受諾（中核州を割譲）
 	option = {
 		name = borderwar.4.a
-		trigger = { NOT = { bw_from_is_subject = yes } }
+		trigger = {
+			NOT = { bw_from_is_subject = yes }
+			NOT = { bw_must_cede_to_from = yes }
+		}
 		ai_chance = {
 			factor = 1
 			modifier = {
@@ -139,6 +177,22 @@ country_event = {
 				strength_ratio = { tag = FROM ratio < 0.5 }
 			}
 		}
+		FROM = {
+			var:bw_target_state = {
+				if = {
+					limit = { is_owned_by = ROOT }
+					transfer_state_to = PREV
+				}
+			}
+			country_event = { id = borderwar.2 days = 1 }
+		}
+	}
+
+	# 受諾（同盟国・宗主国からの要求。これしか選べない）
+	option = {
+		name = borderwar.4.a_ally
+		trigger = { bw_must_cede_to_from = yes }
+		ai_chance = { factor = 100 }
 		FROM = {
 			var:bw_target_state = {
 				if = {
@@ -157,8 +211,23 @@ country_event = {
 # ---------------------------------------------------------------
 country_event = {
 	id = borderwar.2
-	title = borderwar.2.t
-	desc = borderwar.2.d
+	title = {
+		text = borderwar.2.t
+		trigger = { NOT = { bw_from_is_friend = yes } }
+	}
+	title = {
+		text = borderwar.2.t_ally
+		trigger = { bw_from_is_friend = yes }
+	}
+	desc = {
+		text = borderwar.2.d
+		trigger = { NOT = { bw_from_is_friend = yes } }
+	}
+	# 同盟国・属国が割譲した場合
+	desc = {
+		text = borderwar.2.d_ally
+		trigger = { bw_from_is_friend = yes }
+	}
 	picture = GFX_report_event_generic_sign_treaty1
 	is_triggered_only = yes
 
@@ -170,6 +239,15 @@ country_event = {
 
 	option = {
 		name = borderwar.2.a
+		trigger = { NOT = { bw_from_is_friend = yes } }
+		clr_country_flag = bw_demand_pending
+		clear_variable = bw_target_state
+		clear_variable = bw_target_country
+	}
+
+	option = {
+		name = borderwar.2.a_ally
+		trigger = { bw_from_is_friend = yes }
 		clr_country_flag = bw_demand_pending
 		clear_variable = bw_target_state
 		clear_variable = bw_target_country

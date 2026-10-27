@@ -34,3 +34,13 @@ bw_must_cede_to_from = {
 		is_subject_of = FROM
 	}
 }
+
+# 割譲した相手国（FROM）が自国（ROOT）の同盟国（同じ陣営）か属国
+# 要求した国側のイベント（ROOT = 要求した国、FROM = 割譲した国）で使う
+bw_from_is_friend = {
+	NOT = { is_subject_of = FROM }
+	OR = {
+		is_in_faction_with = FROM
+		FROM = { is_subject_of = ROOT }
+	}
+}
